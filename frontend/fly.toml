@@ -1,0 +1,26 @@
+# Fly.io configuration for frontend service
+# Deploy from frontend/ directory: flyctl deploy
+
+app = "gitgud-frontend"
+primary_region = "iad"  # Change to your preferred region
+
+[build]
+  dockerfile = "Dockerfile"
+  dockerfilePath = "./Dockerfile"
+  build_args = ["VITE_API_URL"]
+
+[env]
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
