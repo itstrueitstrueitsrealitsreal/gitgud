@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitGud - Roast GitHub Profiles</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🔥 GitGud</h1>
+        <p class="tagline">Roast GitHub profiles with AI</p>
+      </header>
+
+      <div class="input-section">
+        <div class="form-group">
+          <label for="username">GitHub Username</label>
+          <input
+            type="text"
+            id="username"
+            placeholder="octocat"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="intensity">Roast Intensity</label>
+          <select id="intensity">
+            <option value="mild">Mild 🌶️</option>
+            <option value="medium" selected>Medium 🌶️🌶️</option>
+            <option value="spicy">Spicy 🌶️🌶️🌶️</option>
+          </select>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" id="includeReadme" checked />
+            Include README analysis
+          </label>
+        </div>
+
+        <div class="button-group">
+          <button id="roastBtn" class="btn btn-primary">🔥 Roast Me</button>
+          <button id="speakBtn" class="btn btn-secondary" disabled>
+            🔊 Speak Roast
+          </button>
+        </div>
+      </div>
+
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>Analyzing GitHub profile...</p>
+      </div>
+
+      <div id="error" class="error hidden">
+        <p class="error-message"></p>
+      </div>
+
+      <div id="results" class="results hidden">
+        <section class="result-section roast-section">
+          <h2>🔥 The Roast</h2>
+          <p id="roastText" class="roast-text"></p>
+        </section>
+
+        <section class="result-section advice-section">
+          <h2>💡 Serious Advice</h2>
+          <ul id="adviceList" class="advice-list"></ul>
+        </section>
+
+        <section class="result-section profile-section">
+          <h2>👤 Developer Personality</h2>
+          <div class="profile-content">
+            <div class="profile-item">
+              <h3>Archetype</h3>
+              <p id="archetype" class="profile-archetype"></p>
+            </div>
+            <div class="profile-item">
+              <h3>Strengths</h3>
+              <ul id="strengthsList" class="profile-list"></ul>
+            </div>
+            <div class="profile-item">
+              <h3>Blind Spots</h3>
+              <ul id="blindSpotsList" class="profile-list"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="result-section signals-section">
+          <h2>📊 GitHub Signals</h2>
+          <div id="signalsContent" class="signals-content"></div>
+        </section>
+      </div>
+
+      <footer>
+        <p class="footer-text">Powered by OpenAI & ElevenLabs</p>
+      </footer>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

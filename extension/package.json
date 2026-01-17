@@ -1,0 +1,18 @@
+{
+  "name": "gitgud-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension for GitGud - Roast GitHub profiles with AI",
+  "scripts": {
+    "build": "echo 'No build step needed - plain JavaScript extension'",
+    "icons": "node generate-icons.js"
+  },
+  "keywords": [
+    "chrome-extension",
+    "github",
+    "ai",
+    "roast"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {}
+}
