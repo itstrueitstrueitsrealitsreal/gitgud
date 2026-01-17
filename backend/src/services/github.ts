@@ -11,7 +11,7 @@ export class GitHubService {
   }
 
   private async fetchGitHub<T>(endpoint: string): Promise<T> {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Accept': 'application/vnd.github.v3+json',
       'User-Agent': 'GitGud-Backend/1.0',
     };
@@ -24,16 +24,32 @@ export class GitHubService {
       const response = await fetch(`${GITHUB_API_BASE}${endpoint}`, { headers });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          // If we have a token but got 401, it's invalid - try without token
+          if (this.token) {
+            // Retry without token (unauthenticated requests have lower rate limits but work)
+            const retryHeaders: Record<string, string> = {
+              'Accept': 'application/vnd.github.v3+json',
+              'User-Agent': 'GitGud-Backend/1.0',
+            };
+            const retryResponse = await fetch(`${GITHUB_API_BASE}${endpoint}`, { headers: retryHeaders });
+            if (retryResponse.ok) {
+              return retryResponse.json() as Promise<T>;
+            }
+            throw new Error('GitHub API authentication failed. Please check your GITHUB_TOKEN or remove it to use unauthenticated requests (with rate limits).');
+          }
+          throw new Error('GitHub API authentication failed');
+        }
         if (response.status === 404) {
           throw new Error('GitHub user not found');
         }
         if (response.status === 403) {
-          throw new Error('GitHub API rate limit exceeded');
+          throw new Error('GitHub API rate limit exceeded. Consider setting a valid GITHUB_TOKEN for higher rate limits.');
         }
         throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
       }
 
-      return response.json();
+      return response.json() as Promise<T>;
     } catch (error) {
       // Provide more detailed error information
       if (error instanceof Error) {

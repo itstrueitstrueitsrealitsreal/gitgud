@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gitgud-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+      - BACKEND_URL=${BACKEND_URL:-http://localhost:3000}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      # Optional: mount .env file if you prefer
+      # - ./backend/.env:/app/.env:ro
+      - backend-cache:/app/cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - gitgud-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:3000}
+    container_name: gitgud-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - gitgud-network
+
+volumes:
+  backend-cache:
+
+networks:
+  gitgud-network:
+    driver: bridge

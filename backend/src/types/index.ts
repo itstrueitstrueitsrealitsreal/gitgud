@@ -77,3 +77,93 @@ export interface TTSRequest {
   voiceId: string;
   modelId?: string;
 }
+
+export interface CompareRequest {
+  username1: string;
+  username2: string;
+  language?: string; // ISO language code (e.g., 'en', 'es', 'fr')
+}
+
+export interface CompareResponse {
+  request_id: string;
+  user1: {
+    username: string;
+    signals: GitHubSignals;
+    roast: RoastResult;
+  };
+  user2: {
+    username: string;
+    signals: GitHubSignals;
+    roast: RoastResult;
+  };
+  verdict: {
+    winner: 'user1' | 'user2' | 'tie';
+    reasoning: string;
+    score_user1: number;
+    score_user2: number;
+  };
+}
+
+export interface TranslateRequest {
+  text: string;
+  targetLanguage: string; // ISO language code
+}
+
+export interface TranslateResponse {
+  translated_text: string;
+  source_language: string;
+  target_language: string;
+}
+
+export interface LeaderboardEntry {
+  username: string;
+  wins: number;
+  losses: number;
+  win_rate: number;
+  total_matches: number;
+  last_match: string;
+}
+
+export interface LeaderboardResponse {
+  entries: LeaderboardEntry[];
+  total_entries: number;
+}
+
+export interface UserSession {
+  githubId: string;
+  username: string;
+  accessToken: string;
+  avatarUrl?: string;
+}
+
+export interface PVPMatch {
+  matchId: string;
+  player1: {
+    username: string;
+    githubId: string;
+    ready: boolean;
+  } | null;
+  player2: {
+    username: string;
+    githubId: string;
+    ready: boolean;
+  } | null;
+  status: 'waiting' | 'ready' | 'in_progress' | 'completed';
+  result: CompareResponse | null;
+  createdAt: string;
+  startedAt?: string;
+  completedAt?: string;
+}
+
+export interface CreateMatchRequest {
+  username: string;
+}
+
+export interface JoinMatchRequest {
+  matchId: string;
+  username: string;
+}
+
+export interface MatchResponse {
+  match: PVPMatch;
+}
