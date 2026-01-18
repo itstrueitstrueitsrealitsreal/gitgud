@@ -1,15 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Badge } from './ui/badge';
-import Spinner from './Spinner';
-import Results from './Results';
-import { PVPMatch, User, CompareResult } from '../types';
-import { Github, LogOut, Users, CheckCircle2, Clock, Play } from 'lucide-react';
+import { useState, useEffect, useCallback } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Badge } from "./ui/badge";
+import Spinner from "./Spinner";
+import Results from "./Results";
+import { PVPMatch, User, CompareResult } from "../types";
+import { Github, LogOut, Users, CheckCircle2, Clock, Play } from "lucide-react";
 
-const API_BASE = import.meta.env.VITE_API_URL || 
-  (import.meta.env.DEV ? 'http://localhost:3000' : window.location.origin);
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? "http://localhost:3000" : window.location.origin);
 
 interface PVPModeProps {
   user: User | null;
@@ -20,8 +27,10 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
   const [match, setMatch] = useState<PVPMatch | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [matchIdInput, setMatchIdInput] = useState('');
-  const [pollingInterval, setPollingInterval] = useState<ReturnType<typeof setInterval> | null>(null);
+  const [matchIdInput, setMatchIdInput] = useState("");
+  const [pollingInterval, setPollingInterval] = useState<ReturnType<
+    typeof setInterval
+  > | null>(null);
 
   // Fetch current user's match
   const fetchMyMatch = useCallback(async () => {
@@ -29,7 +38,7 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
 
     try {
       const response = await fetch(`${API_BASE}/pvp/my-match`, {
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (response.status === 404) {
@@ -38,23 +47,23 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
       }
 
       if (!response.ok) {
-        throw new Error('Failed to fetch match');
+        throw new Error("Failed to fetch match");
       }
 
       const data = await response.json();
       setMatch(data.match);
     } catch (err) {
-      console.error('Failed to fetch match:', err);
+      console.error("Failed to fetch match:", err);
     }
   }, [user]);
 
   // Poll for match updates
   useEffect(() => {
-    if (match && match.status !== 'completed') {
+    if (match && match.status !== "completed") {
       const interval = setInterval(() => {
         if (match.matchId) {
           fetch(`${API_BASE}/pvp/match/${match.matchId}`, {
-            credentials: 'include',
+            credentials: "include",
           })
             .then((res) => res.json())
             .then((data) => {
@@ -91,11 +100,11 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
 
     try {
       const response = await fetch(`${API_BASE}/pvp/create`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
           username: user.username,
         }),
@@ -103,13 +112,13 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to create match');
+        throw new Error(errorData.error?.message || "Failed to create match");
       }
 
       const data = await response.json();
       setMatch(data.match);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create match');
+      setError(err instanceof Error ? err.message : "Failed to create match");
     } finally {
       setLoading(false);
     }
@@ -123,11 +132,11 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
 
     try {
       const response = await fetch(`${API_BASE}/pvp/join`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
           matchId: matchIdInput.trim(),
           username: user.username,
@@ -136,14 +145,14 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to join match');
+        throw new Error(errorData.error?.message || "Failed to join match");
       }
 
       const data = await response.json();
       setMatch(data.match);
-      setMatchIdInput('');
+      setMatchIdInput("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to join match');
+      setError(err instanceof Error ? err.message : "Failed to join match");
     } finally {
       setLoading(false);
     }
@@ -157,19 +166,19 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
 
     try {
       const response = await fetch(`${API_BASE}/pvp/ready/${match.matchId}`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to set ready');
+        throw new Error(errorData.error?.message || "Failed to set ready");
       }
 
       const data = await response.json();
       setMatch(data.match);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to set ready');
+      setError(err instanceof Error ? err.message : "Failed to set ready");
     } finally {
       setLoading(false);
     }
@@ -186,7 +195,9 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">Please log in to play PVP mode</p>
+          <p className="text-muted-foreground">
+            Please log in to play PVP mode
+          </p>
         </CardContent>
       </Card>
     );
@@ -199,11 +210,17 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
         <CardContent className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {user.avatarUrl && (
-              <img src={user.avatarUrl} alt={user.username} className="w-10 h-10 rounded-full" />
+              <img
+                src={user.avatarUrl}
+                alt={user.username}
+                className="w-10 h-10 rounded-full"
+              />
             )}
             <div>
               <p className="font-semibold">@{user.username}</p>
-              <p className="text-sm text-muted-foreground">Logged in with GitHub</p>
+              <p className="text-sm text-muted-foreground">
+                Logged in with GitHub
+              </p>
             </div>
           </div>
           <Button variant="outline" size="sm" onClick={onLogout}>
@@ -230,7 +247,9 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
                 <Play className="w-5 h-5" />
                 Create Match
               </CardTitle>
-              <CardDescription>Start a new PVP battle and wait for an opponent</CardDescription>
+              <CardDescription>
+                Start a new PVP battle and wait for an opponent
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Button
@@ -239,7 +258,7 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
                 className="w-full"
                 size="lg"
               >
-                {loading ? <Spinner size="sm" /> : 'Create Match'}
+                {loading ? <Spinner size="sm" /> : "Create Match"}
               </Button>
             </CardContent>
           </Card>
@@ -250,7 +269,9 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
                 <Users className="w-5 h-5" />
                 Join Match
               </CardTitle>
-              <CardDescription>Enter a match ID to join an existing battle</CardDescription>
+              <CardDescription>
+                Enter a match ID to join an existing battle
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Input
@@ -265,7 +286,7 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
                 className="w-full"
                 size="lg"
               >
-                {loading ? <Spinner size="sm" /> : 'Join Match'}
+                {loading ? <Spinner size="sm" /> : "Join Match"}
               </Button>
             </CardContent>
           </Card>
@@ -273,26 +294,36 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
       )}
 
       {/* Match Waiting */}
-      {match && match.status === 'waiting' && (
+      {match && match.status === "waiting" && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5" />
               Waiting for Opponent
             </CardTitle>
-            <CardDescription>Share your match ID: <code className="bg-muted px-2 py-1 rounded">{match.matchId}</code></CardDescription>
+            <CardDescription>
+              Share your match ID:{" "}
+              <code className="bg-muted px-2 py-1 rounded">
+                {match.matchId}
+              </code>
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                 <div className="flex items-center gap-3">
                   <Github className="w-5 h-5" />
-                  <span className="font-semibold">@{match.player1?.username}</span>
+                  <span className="font-semibold">
+                    @{match.player1?.username}
+                  </span>
                 </div>
                 <Badge>Player 1</Badge>
               </div>
               <div className="flex items-center justify-between p-4 border-2 border-dashed rounded-lg">
-                <span className="text-muted-foreground">Waiting for Player 2...</span>
+                <span className="text-muted-foreground flex items-center gap-1">
+                  Waiting for Player 2
+                  <span className="dots" aria-hidden="true"></span>
+                </span>
               </div>
             </div>
           </CardContent>
@@ -300,22 +331,28 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
       )}
 
       {/* Match Ready */}
-      {match && match.status === 'ready' && (
+      {match && match.status === "ready" && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
               Match Ready
             </CardTitle>
-            <CardDescription>Both players joined. Click ready when you're prepared!</CardDescription>
+            <CardDescription>
+              Both players joined. Click ready when you're prepared!
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
-              <div className={`p-4 rounded-lg border-2 ${isPlayer1 ? 'border-primary bg-primary/5' : 'bg-muted'}`}>
+              <div
+                className={`p-4 rounded-lg border-2 ${isPlayer1 ? "border-primary bg-primary/5" : "bg-muted"}`}
+              >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Github className="w-5 h-5" />
-                    <span className="font-semibold">@{match.player1?.username}</span>
+                    <span className="font-semibold">
+                      @{match.player1?.username}
+                    </span>
                   </div>
                   {match.player1?.ready ? (
                     <Badge variant="default" className="bg-green-500">
@@ -327,17 +364,26 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
                   )}
                 </div>
                 {isPlayer1 && !isReady && (
-                  <Button onClick={handleSetReady} disabled={loading} className="w-full mt-2" size="sm">
-                    {loading ? <Spinner size="sm" /> : 'Mark Ready'}
+                  <Button
+                    onClick={handleSetReady}
+                    disabled={loading}
+                    className="w-full mt-2"
+                    size="sm"
+                  >
+                    {loading ? <Spinner size="sm" /> : "Mark Ready"}
                   </Button>
                 )}
               </div>
 
-              <div className={`p-4 rounded-lg border-2 ${isPlayer2 ? 'border-primary bg-primary/5' : 'bg-muted'}`}>
+              <div
+                className={`p-4 rounded-lg border-2 ${isPlayer2 ? "border-primary bg-primary/5" : "bg-muted"}`}
+              >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Github className="w-5 h-5" />
-                    <span className="font-semibold">@{match.player2?.username}</span>
+                    <span className="font-semibold">
+                      @{match.player2?.username}
+                    </span>
                   </div>
                   {match.player2?.ready ? (
                     <Badge variant="default" className="bg-green-500">
@@ -349,8 +395,13 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
                   )}
                 </div>
                 {isPlayer2 && !isReady && (
-                  <Button onClick={handleSetReady} disabled={loading} className="w-full mt-2" size="sm">
-                    {loading ? <Spinner size="sm" /> : 'Mark Ready'}
+                  <Button
+                    onClick={handleSetReady}
+                    disabled={loading}
+                    className="w-full mt-2"
+                    size="sm"
+                  >
+                    {loading ? <Spinner size="sm" /> : "Mark Ready"}
                   </Button>
                 )}
               </div>
@@ -360,7 +411,7 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
       )}
 
       {/* Match In Progress */}
-      {match && match.status === 'in_progress' && (
+      {match && match.status === "in_progress" && (
         <Card>
           <CardContent className="p-12">
             <div className="flex flex-col items-center justify-center space-y-4">
@@ -375,7 +426,7 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
       )}
 
       {/* Match Completed */}
-      {match && match.status === 'completed' && match.result && (
+      {match && match.status === "completed" && match.result && (
         <div className="space-y-4">
           <Card>
             <CardHeader>
