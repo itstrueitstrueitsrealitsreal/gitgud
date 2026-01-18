@@ -40,6 +40,7 @@ const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 const SESSION_SECRET =
   process.env.SESSION_SECRET || "change-me-in-production-use-random-string";
 const PORT = parseInt(process.env.PORT || "3000", 10);
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:80";
 // Default allowed origins for development
 const DEFAULT_ORIGINS = [
   "http://localhost",
@@ -49,10 +50,16 @@ const DEFAULT_ORIGINS = [
   "http://127.0.0.1:80",
   "http://127.0.0.1:5173",
 ];
-const ALLOWED_ORIGINS =
-  process.env.ALLOWED_ORIGINS?.split(",").filter(Boolean) || DEFAULT_ORIGINS;
+// Normalize and merge frontend URL into allowed origins
+const normalizedFrontend = FRONTEND_URL.replace(/\/$/, "");
+const ALLOWED_ORIGINS = Array.from(
+  new Set([
+    ...(process.env.ALLOWED_ORIGINS?.split(",").filter(Boolean) ||
+      DEFAULT_ORIGINS),
+    normalizedFrontend,
+  ]),
+);
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 // Validate required environment variables
 if (!OPENAI_API_KEY) {
@@ -111,6 +118,14 @@ const sessionSecret =
     ? SESSION_SECRET
     : SESSION_SECRET.padEnd(32, "0").slice(0, 32);
 
+// Use secure cookies with SameSite=None when we are running on HTTPS/backed URL, which is required for cross-site frontend->backend requests
+const isSecureEnv = !!(
+  process.env.NODE_ENV === "production" ||
+  process.env.BACKEND_URL?.startsWith("https://")
+);
+const cookieSameSite: "none" | "lax" = isSecureEnv ? "none" : "lax";
+const cookieSecure: boolean = isSecureEnv;
+
 fastify.register(fastifyCookie, {
   secret: sessionSecret,
 });
@@ -121,8 +136,8 @@ fastify.register(fastifySession, {
   cookie: {
     path: "/",
     httpOnly: true,
-    secure: false, // Set to false for local development with Docker
-    sameSite: "lax" as const,
+    secure: cookieSecure,
+    sameSite: cookieSameSite, // 'none' for cross-domain (production/https)
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
   saveUninitialized: false,
