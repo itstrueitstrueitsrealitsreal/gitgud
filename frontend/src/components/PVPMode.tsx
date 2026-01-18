@@ -12,7 +12,7 @@ import { Badge } from "./ui/badge";
 import Spinner from "./Spinner";
 import Results from "./Results";
 import { PVPMatch, User, CompareResult } from "../types";
-import { Github, LogOut, Users, CheckCircle2, Clock, Play } from "lucide-react";
+import { Github, LogOut, Users, CheckCircle2, Clock, Play, X } from "lucide-react";
 
 const API_BASE =
   import.meta.env.VITE_API_URL ||
@@ -184,6 +184,32 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
     }
   };
 
+  const handleLeaveMatch = async () => {
+    if (!match) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/pvp/leave`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Failed to leave match");
+      }
+
+      // Clear match state to show create/join options
+      setMatch(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to leave match");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const isPlayer1 = match?.player1?.githubId === user?.githubId;
   const isPlayer2 = match?.player2?.githubId === user?.githubId;
   const isPlayer = isPlayer1 || isPlayer2;
@@ -297,16 +323,30 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
       {match && match.status === "waiting" && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              Waiting for Opponent
-            </CardTitle>
-            <CardDescription>
-              Share your match ID:{" "}
-              <code className="bg-muted px-2 py-1 rounded">
-                {match.matchId}
-              </code>
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Waiting for Opponent
+                </CardTitle>
+                <CardDescription>
+                  Share your match ID:{" "}
+                  <code className="bg-muted px-2 py-1 rounded">
+                    {match.matchId}
+                  </code>
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLeaveMatch}
+                disabled={loading}
+                className="flex items-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Leave Match
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -334,13 +374,27 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
       {match && match.status === "ready" && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Match Ready
-            </CardTitle>
-            <CardDescription>
-              Both players joined. Click ready when you're prepared!
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Match Ready
+                </CardTitle>
+                <CardDescription>
+                  Both players joined. Click ready when you're prepared!
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLeaveMatch}
+                disabled={loading}
+                className="flex items-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Leave Match
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
@@ -430,7 +484,19 @@ export default function PVPMode({ user, onLogout }: PVPModeProps) {
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Battle Complete!</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Battle Complete!</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLeaveMatch}
+                  disabled={loading}
+                  className="flex items-center gap-2"
+                >
+                  <X className="w-4 h-4" />
+                  Leave Match
+                </Button>
+              </div>
             </CardHeader>
           </Card>
           <Results result={match.result} />

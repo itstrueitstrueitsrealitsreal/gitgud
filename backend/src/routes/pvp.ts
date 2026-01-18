@@ -392,6 +392,45 @@ export async function pvpRoutes(
     },
   );
 
+  // Leave/delete match
+  fastify.post(
+    "/pvp/leave",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const user = getAuthenticatedUser(request);
+        
+        const existingMatch = pvpService.getUserMatch(user.githubId);
+        if (!existingMatch) {
+          return reply.send({ success: true, message: "No active match found" });
+        }
+
+        pvpService.deleteMatch(existingMatch.matchId);
+
+        return reply.send({ success: true, message: "Match left successfully" });
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Internal server error";
+        if (errorMessage === "Not authenticated") {
+          const errorResponse: ErrorResponse = {
+            error: {
+              code: "BAD_REQUEST",
+              message: "Not authenticated",
+            },
+          };
+          return reply.code(401).send(errorResponse);
+        }
+        fastify.log.error({ error: errorMessage }, "Leave match failed");
+        const errorResponse: ErrorResponse = {
+          error: {
+            code: "INTERNAL_ERROR",
+            message: errorMessage,
+          },
+        };
+        return reply.code(500).send(errorResponse);
+      }
+    },
+  );
+
   // Get user's current match
   fastify.get(
     "/pvp/my-match",

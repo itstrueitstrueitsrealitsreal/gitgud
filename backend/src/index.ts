@@ -275,6 +275,7 @@ fastify.get("/", async () => {
       "POST /auth/logout": "Logout user",
       "POST /pvp/create": "Create a new PVP match",
       "POST /pvp/join": "Join an existing PVP match",
+      "POST /pvp/leave": "Leave current match",
       "GET /pvp/match/:matchId": "Get match status",
       "POST /pvp/ready/:matchId": "Mark player as ready",
       "GET /pvp/my-match": "Get current user's match",
